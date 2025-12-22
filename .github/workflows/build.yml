@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Build lib
 
 on:
   push:
@@ -25,6 +25,29 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Prepare build sources
+        run: |
+          sed -i 's/\(tsc\) .*$/\1",/' package.json
+          bun add -d @types/node @types/emscripten
+          mkdir utils
+          cd src && cp -r utils.ts jsyaml.ts pyyaml.ts converter.ts types ../utils
+          cd -
+          cat > tsconfig.json << 'EOF'
+          {
+            "compilerOptions": {
+              "declaration": true,
+              "declarationMap": true,
+              "target": "ES2020",
+              "rootDir": "./utils",
+              "module": "commonjs",
+              "types": ["node", "emscripten"],
+              "outDir": "./dist",
+              "sourceMap": false
+            },
+            "include": ["utils", "utils/types"]
+          }
+          EOF
+
       - name: Build
         run: bun run build
 
@@ -33,6 +56,6 @@ jobs:
         with:
           path: dist/
 
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      # - name: Deploy to GitHub Pages
+      #   id: deployment
+      #   uses: actions/deploy-pages@v4

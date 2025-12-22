@@ -2,7 +2,64 @@
 // Original: https://github.com/clash-verge-rev/clash-verge-rev/blob/dev/src/types/types.d.ts
 // GitHub: https://github.com/siiway/urlclash-converter
 // 本工具仅提供 URL 和 Clash Config 的配置文件格式转换，不存储任何信息，不提供任何代理服务，一切使用产生后果由使用者自行承担，SiiWay Team 及开发本工具的成员不负任何责任.
-
+interface HttpOptions {
+  method?: string;
+  path?: string[];
+  headers?: {
+    [key: string]: string[];
+  };
+}
+interface H2Options {
+  path?: string;
+  host?: string;
+}
+type CipherType =
+  | "none"
+  | "auto"
+  | "dummy"
+  | "aes-128-gcm"
+  | "aes-192-gcm"
+  | "aes-256-gcm"
+  | "lea-128-gcm"
+  | "lea-192-gcm"
+  | "lea-256-gcm"
+  | "aes-128-gcm-siv"
+  | "aes-256-gcm-siv"
+  | "2022-blake3-aes-128-gcm"
+  | "2022-blake3-aes-256-gcm"
+  | "aes-128-cfb"
+  | "aes-192-cfb"
+  | "aes-256-cfb"
+  | "aes-128-ctr"
+  | "aes-192-ctr"
+  | "aes-256-ctr"
+  | "chacha20"
+  | "chacha20-ietf"
+  | "chacha20-ietf-poly1305"
+  | "2022-blake3-chacha20-poly1305"
+  | "rabbit128-poly1305"
+  | "xchacha20-ietf-poly1305"
+  | "xchacha20"
+  | "aegis-128l"
+  | "aegis-256"
+  | "aez-384"
+  | "deoxys-ii-256-128"
+  | "rc4-md5";
+interface SmuxOptions {
+  enabled?: boolean;
+  protocol?: "smux" | "yamux" | "h2mux";
+  "max-connections"?: number;
+  "min-streams"?: number;
+  "max-streams"?: number;
+  padding?: boolean;
+  statistic?: boolean;
+  "only-tcp"?: boolean;
+  "brutal-opts"?: {
+    enabled?: boolean;
+    up?: string;
+    down?: string;
+  };
+}
 // base
 interface IProxyBaseConfig {
   tfo?: boolean;
@@ -137,6 +194,7 @@ interface IProxyVlessConfig extends IProxyBaseConfig {
   network?: NetworkType;
   "reality-opts"?: RealityOptions;
   "http-opts"?: HttpOptions;
+  'xhttp-opts'?: HttpOptions;
   "h2-opts"?: H2Options;
   "grpc-opts"?: GrpcOptions;
   "ws-opts"?: WsOptions;
@@ -148,7 +206,7 @@ interface IProxyVlessConfig extends IProxyBaseConfig {
   fingerprint?: string;
   servername?: string;
   "client-fingerprint"?: ClientFingerprint;
-  smux?: boolean;
+  smux?: boolean | SmuxOptions;
 }
 // vmess
 interface IProxyVmessConfig extends IProxyBaseConfig {
@@ -177,7 +235,7 @@ interface IProxyVmessConfig extends IProxyBaseConfig {
   "global-padding"?: boolean;
   "authenticated-length"?: boolean;
   "client-fingerprint"?: ClientFingerprint;
-  smux?: boolean;
+  smux?: boolean | SmuxOptions;
 }
 interface WireGuardPeerOptions {
   server?: string;
@@ -302,7 +360,7 @@ interface IProxyShadowsocksConfig extends IProxyBaseConfig {
   "udp-over-tcp"?: boolean;
   "udp-over-tcp-version"?: number;
   "client-fingerprint"?: ClientFingerprint;
-  smux?: boolean;
+  smux?: boolean | SmuxOptions;
 }
 // shadowsocksR
 interface IProxyshadowsocksRConfig extends IProxyBaseConfig {
@@ -320,21 +378,7 @@ interface IProxyshadowsocksRConfig extends IProxyBaseConfig {
 }
 // sing-mux
 interface IProxySmuxConfig {
-  smux?: {
-    enabled?: boolean;
-    protocol?: "smux" | "yamux" | "h2mux";
-    "max-connections"?: number;
-    "min-streams"?: number;
-    "max-streams"?: number;
-    padding?: boolean;
-    statistic?: boolean;
-    "only-tcp"?: boolean;
-    "brutal-opts"?: {
-      enabled?: boolean;
-      up?: string;
-      down?: string;
-    };
-  };
+  smux?: boolean|SmuxOptions;
 }
 // snell
 interface IProxySnellConfig extends IProxyBaseConfig {
@@ -346,6 +390,7 @@ interface IProxySnellConfig extends IProxyBaseConfig {
   udp?: boolean;
   version?: number;
 }
+// @ts-expect-error 类型不兼容，但我知道我在做什么
 interface IProxyConfig
   extends
     IProxyBaseConfig,
@@ -387,7 +432,7 @@ interface IProxyConfig
 }
 
 type ClientFingerprint = "chrome" | "firefox" | "safari" | "iOS" | "android" | "edge" | "360" | "qq" | "random";
-type NetworkType = "ws" | "http" | "h2" | "grpc" | "tcp";
+type NetworkType = "ws" | "http" | "h2" | "grpc" | "tcp" | "xhttp";
 interface WsOptions {
   path?: string;
   headers?: {
